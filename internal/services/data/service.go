@@ -8,6 +8,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
 	"os"
+	"time"
 )
 
 type Service struct {
@@ -26,12 +27,12 @@ func New(cfg *configuration.Configuration) (*Service, error) {
 		cfg:     cfg,
 	}
 
-	rates, err := service.getConvertionRates()
+	_, err = service.getConvertionRates()
 	if err != nil {
 		return nil, err
 	}
 
-	log.Info("Rates loaded", "rates", rates)
+	go service.startRateUpdater(context.Background(), 15*time.Minute)
 
 	return service, nil
 }
@@ -55,4 +56,30 @@ func newSheetsService(cfg *configuration.Configuration) (*sheets.Service, error)
 	}
 
 	return srv, nil
+}
+
+func (s *Service) startRateUpdater(ctx context.Context, interval time.Duration) {
+	log.Info("Starting rate updater")
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			s.updateConversionRates()
+		case <-ctx.Done():
+			log.Print("Rate updater stopped")
+			return
+		}
+	}
+}
+
+func (s *Service) updateConversionRates() {
+	_, err := s.getConvertionRates()
+	if err != nil {
+		log.Error("Error updating conversion rates", "error", err)
+		return
+	}
+
+	log.Print("Rates updated")
 }
