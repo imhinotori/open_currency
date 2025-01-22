@@ -25,3 +25,6 @@ go.work.sum
 .env
 
 .idea/
+
+# json files on root
+/*.json
