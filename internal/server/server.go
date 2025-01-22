@@ -8,6 +8,7 @@ import (
 	"github.com/imhinotori/open_currency/internal/configuration"
 	"github.com/imhinotori/open_currency/internal/services"
 	"go.uber.org/fx"
+	"net/http"
 )
 
 type Server struct {
@@ -18,6 +19,11 @@ type Server struct {
 
 func New(lc fx.Lifecycle, services *services.Services, cfg *configuration.Configuration) (*Server, error) {
 	fuegoServer := fuego.NewServer()
+
+	fuego.Get(fuegoServer, "/", func(c fuego.ContextNoBody) (any, error) {
+		return c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+	})
+
 	services.DataService.InitializeHandlers(fuegoServer)
 
 	server := &Server{
