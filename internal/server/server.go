@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"github.com/charmbracelet/log"
 	"github.com/go-fuego/fuego"
 	"github.com/imhinotori/open_currency/internal/configuration"
@@ -44,6 +45,8 @@ func New(lc fx.Lifecycle, services *services.Services, cfg *configuration.Config
 }
 
 func (s *Server) start() error {
+	s.Server.Addr = fmt.Sprintf("%v:%v", s.cfg.HTTP.Address, s.cfg.HTTP.Port)
+
 	if s.cfg.HTTP.SSL {
 		return s.ListenAndServeTLS(s.cfg.HTTP.SSLCert, s.cfg.HTTP.SSLKey)
 	}
