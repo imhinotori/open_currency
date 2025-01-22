@@ -48,8 +48,8 @@ func (s *Server) start() error {
 	s.Server.Addr = fmt.Sprintf("%v:%v", s.cfg.HTTP.Address, s.cfg.HTTP.Port)
 
 	if s.cfg.HTTP.SSL {
-		return s.ListenAndServeTLS(s.cfg.HTTP.SSLCert, s.cfg.HTTP.SSLKey)
+		return s.RunTLS(s.cfg.HTTP.SSLCert, s.cfg.HTTP.SSLKey)
 	}
 
-	return s.ListenAndServe()
+	return s.Run()
 }
